@@ -1,0 +1,63 @@
+<div *ngIf="inputVisible" class="card flex justify-content-center">
+    <textarea rows="5" cols="30" pInputTextarea [(ngModel)]="text"></textarea>
+</div>
+<p-button *ngIf="inputVisible" label="Submit" (onClick)="parse()"></p-button>
+
+
+<div *ngIf="!inputVisible">
+    <input pInputText type="text" class="p-inputtext" placeholder="Search" value="{{wordToSearch}}" /><p-button
+        icon="pi pi-search" (onClick)="findOccurrences(wordToSearch)"></p-button>
+        <div class="left-100 sticky w-2">
+            <p-button class="mx-1" icon="pi pi-check-square" (click)="showTranslateDialog()"></p-button>
+            <p-button class="mx-1" icon="pi pi-delete-left" (click)="showUnconfirmDialog()"></p-button>
+            <p-button class="mx-1" icon="pi pi-undo" (click)="undo()" severity="danger"></p-button>
+        </div>
+</div>
+<div *ngIf="!inputVisible" class="card flex justify-content-center">
+    <p-table [value]="texts" styleClass="p-datatable-striped">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Language</th>
+                <th>Page</th>
+                <th>Line</th>
+                <th class="max-w-max">Body</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-line>
+            <tr>
+                <td></td>
+                <td>{{ line.page }}</td>
+                <td>{{ line.line }}</td>
+                <td class="overflow-scroll white-space-nowrap max-w-max"><input
+                        *ngFor="let word of line.body.split(' ')" id="disabled-input" type="text" pInputText
+                        [disabled]="true" value="{{word}}" class="max-w-8rem mx-1" /></td>
+
+            </tr>
+            <tr>
+                <td>French</td>
+                <td>{{ line.page }}</td>
+                <td>{{ line.line }}</td>
+                <td class="overflow-scroll white-space-nowrap max-w-max"><p-dropdown
+                        [options]="getOptionsToTranslate(i, line.body)"
+                        *ngFor="let word of line.words.split(' '); let i = index" class="mx-1"
+                        [ngClass]="{'ng-dirty ng-invalid' : !line.confirmed[i], 'border-green-500 border-3' : line.confirmed[i]}"
+                        (onClick)="confirm(line, i)"></p-dropdown></td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+<p-dialog header="Occurences" [(visible)]="showDialog" [style]="{width: '30vw'}">
+    <p *ngFor="let occurence of this.dataToDisplay"> Line : {{occurence.page}} <br> Context : {{occurence.context}}</p>
+
+</p-dialog>
+
+<p-dialog header="Translate batch" [(visible)]="showConfirmBatch" [style]="{width: '30vw'}">
+    <p-dropdown></p-dropdown> <br>
+
+
+</p-dialog>
+
+<p-dialog header="Unconfirm batch" [(visible)]="showUnconfirmBatch" [style]="{width: '30vw'}">
+    <p-dropdown></p-dropdown> <br>
+    <p-button class="left-100 top-100 sticky" label="confirm" (click)="undo()"></p-button>
+</p-dialog>

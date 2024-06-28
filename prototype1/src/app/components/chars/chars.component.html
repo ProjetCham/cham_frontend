@@ -1,0 +1,9 @@
+<p-dialog header="Diacritics keyboard" [(visible)]="visible" [style]="{width: '30vw'}">
+    <input type="text" pInputText [(ngModel)]="field" />
+    <br>
+  <span *ngFor="let char of chars; let i = index">
+        <p-button [label]="char" (click)="updateField(char)" class="mx-2 my-1"></p-button>
+        <div *ngIf="(i + 1) % 6 === 0"></div>
+  </span>    
+
+  </p-dialog>

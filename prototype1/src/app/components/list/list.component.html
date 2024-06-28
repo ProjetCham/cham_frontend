@@ -1,0 +1,72 @@
+<div class="card">
+    <p-table #dt1 [value]="lexicons" (sortFunction)="customSort($event)" selectionMode="single" [customSort]="true"
+        [globalFilterFields]="['name', 'gloss']" (onRowSelect)="showMore($event)" [paginator]="true" [rows]="30" 
+        [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+        <ng-template pTemplate="caption">
+          <div class="grid">
+            <div class="flex col-3 align-items-center">Dictionnary ({{lexicons.length}})</div>
+            <div class="flex col-9">
+                <span class="p-input-icon-left ml-auto">
+                    <i class="pi pi-search mr-2"></i>
+                    <input pInputText type="text" class="p-inputtext" (input)="dt1.filterGlobal($any($event.target).value, 'contains')"
+                           placeholder="Search" [(ngModel)]="searchInput"/>
+                           <p-button (onClick)="showKeyboard()"></p-button>
+                </span>
+                <app-chars *ngIf="keyboardVisible" [field]="searchInput" (valueChanged)="handleValueChange($event)" [visible]="keyboardVisible"></app-chars>
+            </div>
+          </div>
+          <div>
+            <p-checkbox label="Variants" [(ngModel)]="variantsVisible" [binary]="true"></p-checkbox>
+            <p-checkbox label="Definitions" [(ngModel)]="definitionsVisible" [binary]="true"></p-checkbox>
+            <p-checkbox label="Dialect" [(ngModel)]="dialectVisible" [binary]="true"></p-checkbox>
+            <p-checkbox label="Cognate" [(ngModel)]="cognateVisible" [binary]="true"></p-checkbox>
+            <p-checkbox label="Picture" [(ngModel)]="picturesVisible" [binary]="true"></p-checkbox>
+
+
+          </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="entry">Entry <p-sortIcon field="entry"></p-sortIcon>
+                </th>
+                <th pSortableColumn="gloss">Gloss <p-sortIcon field="gloss"></p-sortIcon>
+                </th>
+                <th *ngIf="variantsVisible" pSortableColumn="variants">Variants <p-sortIcon field="variants"></p-sortIcon></th>
+                <th *ngIf="definitionsVisible" pSortableColumn="definitions">Definitions <p-sortIcon field="definitions"></p-sortIcon></th>
+                <th *ngIf="dialectVisible" pSortableColumn="dialect">Dialect <p-sortIcon field="dialect"></p-sortIcon></th>
+                <th *ngIf="cognateVisible" pSortableColumn="cognate">Cognate <p-sortIcon field="cognate"></p-sortIcon></th>
+                <th *ngIf="picturesVisible" pSortableColumn="pictures">Pictures <p-sortIcon field="pictures"></p-sortIcon></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-lexicon>
+            <tr [pSelectableRow]="lexicon">
+                <td>
+                    {{lexicon.name}}
+                </td>
+                <td>
+                  <span *ngFor="let def of lexicon.gloss; let index = index">{{(def)}} <span *ngIf="lexicon.gloss.length > index+1">;  </span></span>
+                </td>
+                <div *ngIf="lexicon">
+                  <td *ngIf="variantsVisible"><span *ngFor="let variant of lexicon.variants; let index = index">{{removeBadCharsFromString(variant)}} <span *ngIf="lexicon.variants.length > index+1">;  </span></span></td>
+                  <td *ngIf="definitionsVisible"><span *ngFor="let def of lexicon.definitions; let index = index">{{(def)}} <span *ngIf="lexicon.definitions.length > index+1">;  </span></span></td>
+                  <td *ngIf="dialectVisible">{{lexicon.dialect}}</td>
+                  <td *ngIf="cognateVisible">{{lexicon.cognate}}</td>
+                  <td *ngIf="picturesVisible"><img [src]="lexicon.pic_path[0]" [alt]=""></td>
+                </div>
+                </tr>
+            </ng-template>
+        </p-table>
+        <p-dialog header="Lexicon Details" [(visible)]="dialogVisible" [style]="{width: '30vw'}">
+          <p>entry : {{selectedEntry.name}}</p>
+          <p>dialect : {{selectedEntry.dialect}}</p>
+          <p>cognate : {{selectedEntry.cognate}}</p>
+          <!-- <p>picture : <img [src]="selectedEntry.pic_path[0]" [alt]="selectedEntry.pic_path[0]"></p> -->
+          <div *ngFor="let def of selectedEntry.gloss; let index = index">
+            <p>gloss {{index+1}} : {{def}}</p>
+            <p *ngIf="selectedEntry.definitions.length > index">definition {{index+1}} : {{selectedEntry.definitions[index]}}</p>
+          </div>
+          <p *ngFor="let ex of selectedEntry.examplesFR; let index = index"> french example {{index+1}} : {{ex}}</p>
+          <p *ngFor="let ex of selectedEntry.examplesCHAM; let index = index"> cham example {{index+1}} : {{ex}}</p>
+          <p>variants : <span *ngFor="let variant of selectedEntry.variants"><a class="mx-1 cursor-pointer" (click)="goToVariant(variant, selectedEntry.id ,selectedEntry.name)">{{removeBadCharsFromString(variant)}}</a></span> </p>
+        </p-dialog>
+</div>
